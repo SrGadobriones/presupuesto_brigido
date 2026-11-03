@@ -13,5 +13,5 @@ export interface DatosProducto {
   notas: string; link: string; comprado?: boolean; opcionElegidaId: string | null;
   opciones: Opcion[]; foto?: Uint8Array | null;
 }
-export interface ListaResumen extends Lista { total: number; productos: number }
+export interface ListaResumen extends Lista { total: number; comprado: number; productos: number }
 export interface Todo { listas: Lista[]; productos: Producto[] }

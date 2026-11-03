@@ -176,11 +176,14 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .eliminar-lista { position: absolute; top: 10px; right: 10px; }
 
 /* ---------- Presupuesto (barra) ---------- */
-.progreso { height: 10px; background: color-mix(in srgb, var(--texto) 14%, transparent); border-radius: 999px; overflow: hidden; }
+.progreso { display: flex; height: 10px; background: color-mix(in srgb, var(--texto) 14%, transparent); border-radius: 999px; overflow: hidden; }
 .progreso-barra { height: 100%; border-radius: 999px; transform-origin: left; animation: llenar 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 .progreso-barra.ok { background: var(--ok); }
 .progreso-barra.cerca { background: var(--cerca); }
 .progreso-barra.excedido { background: var(--excedido); }
+.progreso-barra.pendiente { opacity: 0.4; border-radius: 0; }
+.progreso-leyenda { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.progreso-leyenda strong { font-weight: 700; }
 .texto-excedido { color: var(--excedido); font-weight: 600; }
 @keyframes llenar { from { transform: scaleX(0); } }
 
@@ -188,7 +191,7 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .lista { display: grid; gap: 8px; padding: 16px 0; border-top: 1px solid var(--borde); color: inherit; }
 .lista:last-of-type { border-bottom: 1px solid var(--borde); margin-bottom: 20px; }
 .lista-fila { display: flex; align-items: center; gap: var(--gap); }
-.lista-fila .lista { flex: 1; min-width: 0; }
+.lista-fila .lista { flex: 1; min-width: 0; padding-inline-end: 12px; }
 .lista-fila.seleccionada { background: color-mix(in srgb, var(--cobalto) 10%, transparent); }
 .lista:hover .lista-nombre { text-decoration: underline; text-underline-offset: 3px; }
 .lista-cabecera { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
@@ -291,6 +294,7 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
   .barra-seleccion-espacio { display: none; }
   .barra-seleccion-quitar { order: 2; margin-left: auto; }
   .barra-seleccion-marcar { order: 3; flex: 1 1 55%; }
+  .barra-seleccion-duplicar { order: 3; flex: 1 1 40%; }
   .barra-seleccion-eliminar { order: 4; }
 }
 /* Espacio al final de la lista para que la barra flotante no tape la última fila. */
@@ -390,6 +394,9 @@ dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0
   .encabezado h1 { font-size: 1.55rem; }
   .encabezado .acciones { width: 100%; gap: 6px; }
   .encabezado .acciones .boton.primario { margin-left: auto; }
+  /* Detalle de lista: «Agregar producto» ocupa su propia fila arriba y las demás acciones se reparten la fila de abajo. */
+  .acciones-lista .boton.primario { order: -1; flex: 1 1 100%; margin-left: 0; }
+  .acciones-lista .boton:not(.primario) { flex: 1 1 0; padding-inline: 8px; }
   .etiqueta { margin: 10px 0 20px; padding: 16px 16px 16px 40px; }
   .etiqueta::before { left: 16px; width: 12px; height: 12px; }
   .etiqueta-cifra { font-size: 2.45rem; }

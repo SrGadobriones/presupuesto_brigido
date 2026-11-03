@@ -2,7 +2,10 @@ import { useState } from 'preact/hooks';
 import { validarLista } from '../dominio/validar';
 import { useApp } from './contexto';
 import { useResumenListas } from './useDatos';
-import { hrefLista } from './ruta';
+import { hrefLista, irA } from './ruta';
+import { importarTextoWhatsapp } from './whatsapp';
+import IconoWhatsapp from './IconoWhatsapp';
+import { duplicarLista } from './duplicar';
 import { formatearPrecio, parsearNumero, mensajeError } from './formato';
 import BarraPresupuesto from './BarraPresupuesto';
 import Modal from './Modal';
@@ -11,7 +14,7 @@ import BarraSeleccion from './BarraSeleccion';
 import ModalConfirmar from './ModalConfirmar';
 
 export default function Inicio() {
-  const { repo } = useApp();
+  const { repo, avisar } = useApp();
   const { listas, cargando, error: errorDatos } = useResumenListas();
   const [creando, setCreando] = useState(false);
   const [nombre, setNombre] = useState('');
@@ -19,6 +22,29 @@ export default function Inicio() {
   const [error, setError] = useState<string | null>(null);
   const [seleccion, setSeleccion] = useState<string[]>([]);
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false);
+  const [confirmandoDuplicar, setConfirmandoDuplicar] = useState(false);
+  const [importando, setImportando] = useState(false);
+  const [textoImportado, setTextoImportado] = useState('');
+  const [errorImportar, setErrorImportar] = useState<string | null>(null);
+  const [procesandoImportar, setProcesandoImportar] = useState(false);
+  const cerrarImportar = () => {
+    setImportando(false);
+    setTextoImportado('');
+    setErrorImportar(null);
+  };
+  const importar = async (e: Event) => {
+    e.preventDefault();
+    setProcesandoImportar(true);
+    try {
+      const id = await importarTextoWhatsapp(repo, textoImportado);
+      cerrarImportar();
+      irA(hrefLista(id));
+    } catch (x) {
+      setErrorImportar(mensajeError(x, 'No se pudo importar la lista'));
+    } finally {
+      setProcesandoImportar(false);
+    }
+  };
 
   const cancelar = () => {
     setCreando(false);
@@ -54,6 +80,14 @@ export default function Inicio() {
   const todosSeleccionados = listas.length > 0 && seleccionados.length === listas.length;
   const alternarLista = (id: string, marcada: boolean) =>
     setSeleccion((actual) => marcada ? [...new Set([...actual, id])] : actual.filter((x) => x !== id));
+  const duplicarSeleccionadas = async () => {
+    try {
+      for (const id of seleccionados) await duplicarLista(repo, id);
+      setSeleccion([]);
+    } catch (e) {
+      avisar(mensajeError(e, 'No se pudo duplicar la lista'));
+    }
+  };
   const eliminarSeleccionadas = async () => {
     await Promise.all(seleccionados.map((id) => repo.eliminarLista(id)));
     setSeleccion([]);
@@ -64,8 +98,15 @@ export default function Inicio() {
     <>
       <header class="encabezado">
         <h1>Presupuesto Brígido</h1>
-        <div class="acciones"><button class="boton primario chico" onClick={() => setCreando(true)}>Nueva lista</button></div>
+        <div class="acciones"><button class="boton chico" onClick={() => setImportando(true)}><IconoWhatsapp />Importar</button><button class="boton primario chico" onClick={() => setCreando(true)}>Nueva lista</button></div>
       </header>
+      <Modal abierto={importando} titulo="Importar lista" onCerrar={cerrarImportar}>
+        <form class="formulario-modal" onSubmit={(e) => void importar(e)} noValidate>
+          <label class="campo"><span>Pega aquí la lista compartida por WhatsApp</span><textarea rows={10} value={textoImportado} onInput={(e) => setTextoImportado(e.currentTarget.value)} autofocus /></label>
+          {errorImportar && <div class="aviso error">{errorImportar}</div>}
+          <div class="acciones modal-acciones"><button class="boton" type="button" onClick={cerrarImportar}>Cancelar</button><button class="boton primario" disabled={procesandoImportar || !textoImportado.trim()}>{procesandoImportar ? 'Importando…' : 'Importar lista'}</button></div>
+        </form>
+      </Modal>
       <Modal abierto={creando} titulo="Nueva lista" onCerrar={cancelar}>
         <form class="formulario-modal" onSubmit={(e) => void enviar(e)} noValidate>
           <label class="campo"><span>Nombre de la lista</span><input value={nombre} onInput={(e) => setNombre(e.currentTarget.value)} autofocus required /></label>
@@ -78,8 +119,9 @@ export default function Inicio() {
       {cargando && !errorDatos && <Loader mensaje="Cargando tus listas…" />}
       {!cargando && !errorDatos && listas.length === 0 && <p class="vacio">Aún no hay listas. Crea la primera para empezar.</p>}
       {listas.length > 0 && <div class="resumen-compras-fila"><p class="resumen-compras">Selecciona una o más listas para eliminarlas.</p><button class="boton chico fantasma" type="button" onClick={() => setSeleccion(todosSeleccionados ? [] : listas.map((lista) => lista.id))}>{todosSeleccionados ? 'Quitar selección' : 'Seleccionar todo'}</button></div>}
-      {listas.map((l) => <div class={`lista-fila${seleccionados.includes(l.id) ? ' seleccionada' : ''}`} key={l.id}><input class="casilla-seleccion" type="checkbox" checked={seleccionados.includes(l.id)} aria-label={`Seleccionar: ${l.nombre}`} onChange={(e) => alternarLista(l.id, e.currentTarget.checked)} /><a class="lista" href={hrefLista(l.id)}><div class="lista-cabecera"><span class="lista-nombre">{l.nombre}</span><small class="muted">{l.productos} {l.productos === 1 ? 'producto' : 'productos'}</small></div><div class="lista-total"><span class="cifra">{formatearPrecio(l.total)}</span>{l.tope !== null && <span class="muted">de {formatearPrecio(l.tope)}</span>}</div><BarraPresupuesto total={l.total} tope={l.tope} /></a></div>)}
-      {seleccionados.length > 0 && <><div class="relleno-barra-seleccion" /><BarraSeleccion cantidad={seleccionados.length} elemento="lista" onEliminar={() => setConfirmandoEliminar(true)} onQuitar={() => setSeleccion([])} /></>}
+      {listas.map((l) => <div class={`lista-fila${seleccionados.includes(l.id) ? ' seleccionada' : ''}`} key={l.id}><input class="casilla-seleccion" type="checkbox" checked={seleccionados.includes(l.id)} aria-label={`Seleccionar: ${l.nombre}`} onChange={(e) => alternarLista(l.id, e.currentTarget.checked)} /><a class="lista" href={hrefLista(l.id)}><div class="lista-cabecera"><span class="lista-nombre">{l.nombre}</span><small class="muted">{l.productos} {l.productos === 1 ? 'producto' : 'productos'}</small></div><div class="lista-total"><span class="cifra">{formatearPrecio(l.total)}</span>{l.tope !== null && <span class="muted">de {formatearPrecio(l.tope)}</span>}</div><BarraPresupuesto total={l.total} comprado={l.comprado} tope={l.tope} leyenda /></a></div>)}
+      {seleccionados.length > 0 && <><div class="relleno-barra-seleccion" /><BarraSeleccion cantidad={seleccionados.length} elemento="lista" onDuplicar={() => setConfirmandoDuplicar(true)} onEliminar={() => setConfirmandoEliminar(true)} onQuitar={() => setSeleccion([])} /></>}
+      <ModalConfirmar abierto={confirmandoDuplicar} peligro={false} titulo={seleccionados.length === 1 ? '¿Duplicar esta lista?' : `¿Duplicar ${seleccionados.length} listas?`} mensaje={seleccionados.length === 1 ? 'Se creará una copia de la lista seleccionada con todos sus productos.' : 'Se creará una copia de cada lista seleccionada con todos sus productos.'} confirmar={seleccionados.length === 1 ? 'Duplicar lista' : 'Duplicar listas'} onConfirmar={() => void duplicarSeleccionadas()} onCancelar={() => setConfirmandoDuplicar(false)} />
       <ModalConfirmar abierto={confirmandoEliminar} titulo={seleccionados.length === 1 ? '¿Eliminar esta lista?' : `¿Eliminar ${seleccionados.length} listas?`} mensaje={seleccionados.length === 1 ? 'Se eliminará la lista seleccionada con todos sus productos. Esta acción no se puede deshacer.' : 'Se eliminarán las listas seleccionadas con todos sus productos. Esta acción no se puede deshacer.'} confirmar={seleccionados.length === 1 ? 'Eliminar lista' : 'Eliminar listas'} onConfirmar={() => void eliminarSeleccionadas()} onCancelar={() => setConfirmandoEliminar(false)} />
     </>
   );
