@@ -1,5 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef } from 'preact/hooks';
+import { registrarModal } from './modales';
 
 interface Props {
   abierto: boolean;
@@ -23,6 +24,11 @@ export default function Modal({ abierto, titulo, onCerrar, accionTitulo, ancho =
   const idTitulo = useRef(`modal-titulo-${++contador}`);
   /** true si el último pulsado empezó en el fondo y no dentro del contenido. */
   const pulsoEnFondo = useRef(false);
+
+  /** Siempre la versión más reciente de `onCerrar`, para el botón «atrás» del celular. */
+  const cerrarActual = useRef(onCerrar);
+  cerrarActual.current = onCerrar;
+  useEffect(() => (abierto ? registrarModal(() => cerrarActual.current()) : undefined), [abierto]);
 
   useEffect(() => {
     const d = dialogo.current;

@@ -289,6 +289,8 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .interruptor input:checked ~ .interruptor-texto { color: var(--ok); }
 
 /* Barra de acciones sobre la selección: flota fija al borde inferior de la ventana, centrada en la columna. */
+/* Aviso breve de «pulsa atrás otra vez para salir» (app Android). */
+.aviso-flotante { position: fixed; z-index: 30; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%); max-width: calc(100vw - 32px); padding: 10px 16px; border-radius: 999px; background: var(--texto); color: var(--fondo); font-size: 0.92rem; font-weight: 600; text-align: center; box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.5); pointer-events: none; }
 /* Botón «+» flotante: aparece al salir de pantalla el botón de agregar del encabezado. */
 .fab-agregar { position: fixed; z-index: 5; right: max(12px, calc((100vw - 640px) / 2 + 12px)); bottom: max(10px, env(safe-area-inset-bottom)); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--etiqueta); color: var(--tinta); border: 1px solid var(--tinta); box-shadow: 0 2px 0 var(--tinta), 0 10px 24px -8px rgb(0 0 0 / 0.55); opacity: 0; transform: translateY(16px) scale(0.85); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
 .fab-agregar.visible { opacity: 1; transform: none; pointer-events: auto; }

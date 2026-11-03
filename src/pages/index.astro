@@ -3,12 +3,15 @@ import Raiz from '../ui/Raiz';
 import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource-variable/instrument-sans';
 import '../ui/estilos.css';
+// Identifica esta compilación: «Buscar actualizaciones» lo compara con el de la versión publicada.
+const idCompilacion = Date.now().toString(36);
 ---
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="build-id" content={idCompilacion} />
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} />
     <title>Presupuesto Brígido</title>
     <script is:inline>
