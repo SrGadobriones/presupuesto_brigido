@@ -136,6 +136,8 @@ a { color: var(--cobalto); text-decoration: none; }
 .boton.fantasma { background: transparent; border-color: transparent; }
 .boton:disabled { opacity: 0.45; cursor: not-allowed; }
 .boton:disabled:active { transform: none; }
+/* Si el encabezado se parte en dos líneas, sus acciones conservan el borde derecho. */
+.encabezado > .acciones { margin-left: auto; }
 .acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 /* Campo de enlace con su botón "Abrir" fuera del campo, alineado con el borde inferior del input. */
 .campo-enlace { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
