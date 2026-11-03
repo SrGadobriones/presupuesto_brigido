@@ -110,6 +110,8 @@ a { color: var(--cobalto); text-decoration: none; }
 /* Fila superior: "‹ Listas" a la izquierda, tema y Datos a la derecha (siempre en el mismo sitio). */
 .barra-superior { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); min-height: var(--control-chico); margin-bottom: var(--gap); }
 .barra-superior-acciones { margin-left: auto; flex-wrap: nowrap; }
+/* Título de la app (inicio): comparte fila con el tema y la cuenta, que se quedan pegados a la derecha. */
+.barra-superior-titulo { flex: 1 1 auto; min-width: 0; font-size: clamp(1.25rem, 5.2vw, 1.9rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .migas::before { content: '‹ '; }
 
 /* ---------- Botones y campos ---------- */
@@ -195,6 +197,7 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .lista-fila.seleccionada { background: color-mix(in srgb, var(--cobalto) 10%, transparent); }
 .lista:hover .lista-nombre { text-decoration: underline; text-underline-offset: 3px; }
 .lista-cabecera { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.lista-cabecera small { flex: none; white-space: nowrap; }
 .lista-nombre { font-family: var(--fuente-display); font-size: 1.2rem; font-weight: 650; letter-spacing: -0.01em; }
 .lista-total { display: flex; align-items: baseline; gap: 8px; }
 .cifra { font-family: var(--fuente-display); font-size: clamp(1.5rem, min(8vw, 7vh), 1.9rem); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
@@ -286,16 +289,20 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .interruptor input:checked ~ .interruptor-texto { color: var(--ok); }
 
 /* Barra de acciones sobre la selección: flota fija al borde inferior de la ventana, centrada en la columna. */
+/* Botón «+» flotante: aparece al salir de pantalla el botón de agregar del encabezado. */
+.fab-agregar { position: fixed; z-index: 5; right: max(12px, calc((100vw - 640px) / 2 + 12px)); bottom: max(10px, env(safe-area-inset-bottom)); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--etiqueta); color: var(--tinta); border: 1px solid var(--tinta); box-shadow: 0 2px 0 var(--tinta), 0 10px 24px -8px rgb(0 0 0 / 0.55); opacity: 0; transform: translateY(16px) scale(0.85); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
+.fab-agregar.visible { opacity: 1; transform: none; pointer-events: auto; }
+.fab-agregar.visible:active { transform: translateY(2px); box-shadow: 0 0 0 var(--tinta), 0 6px 16px -8px rgb(0 0 0 / 0.55); }
 .barra-seleccion-capa { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; justify-content: center; padding: 0 var(--espacio) max(12px, env(safe-area-inset-bottom)); pointer-events: none; }
 .barra-seleccion { pointer-events: auto; width: 100%; max-width: calc(640px - var(--espacio) * 2); display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap); padding: 10px 12px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); box-shadow: 0 12px 32px -10px rgb(0 0 0 / 0.65); }
 /* Pantallas angostas: contador y "Quitar selección" arriba, las dos acciones debajo (2 líneas en vez de 3). */
 @media (max-width: 480px) {
-  .barra-seleccion > strong { order: 1; }
-  .barra-seleccion-espacio { display: none; }
-  .barra-seleccion-quitar { order: 2; margin-left: auto; }
-  .barra-seleccion-marcar { order: 3; flex: 1 1 55%; }
-  .barra-seleccion-duplicar { order: 3; flex: 1 1 40%; }
-  .barra-seleccion-eliminar { order: 4; }
+  .barra-seleccion > strong { order: 1; flex: 1 1 auto; }
+  .barra-seleccion-quitar { order: 1; flex: none; }
+  /* Salto de línea: obliga a que las acciones bajen a la segunda fila, repartidas en partes iguales. */
+  .barra-seleccion .barra-seleccion-espacio { display: block; order: 2; flex: 0 0 100%; height: 0; }
+  .barra-seleccion { row-gap: 0; }
+  .barra-seleccion-marcar, .barra-seleccion-duplicar, .barra-seleccion-eliminar { order: 3; flex: 1 1 0; min-width: 0; padding-inline: 8px; margin-top: var(--gap); }
 }
 /* Espacio al final de la lista para que la barra flotante no tape la última fila. */
 .relleno-barra-seleccion { height: 7.5rem; }
@@ -330,6 +337,11 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 
 /* …y en una segunda línea bajo el nombre en las angostas, para no apretar el título. */
 @media (max-width: 480px) {
+  /* Detalle de lista: «Agregar producto» ocupa su propia fila arriba y las demás acciones se reparten la fila de abajo. */
+  .encabezado h1 { font-size: 1.35rem; min-width: 0; overflow-wrap: anywhere; }
+  .encabezado .acciones-lista { width: 100%; }
+  .encabezado .acciones-lista > .boton.primario { order: -1; flex: 1 1 100%; margin-left: 0; }
+  .encabezado .acciones-lista > .boton:not(.primario) { flex: 1 1 0; padding-inline: 8px; }
   .fila-producto { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 8px; row-gap: 6px; }
   .fila-producto-acciones { grid-column: 2 / -1; grid-row: 2; gap: 8px; padding-left: calc(var(--miniatura) + 8px); }
   .fila-producto-acciones .interruptor { margin-left: auto; }
@@ -372,6 +384,8 @@ dialog.modal { width: min(92vw, 420px); max-height: var(--alto-modal); padding: 
 dialog.modal::backdrop { background: rgb(8 14 12 / 0.6); }
 dialog.modal.ancho { width: min(94vw, 600px); }
 dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0.16s ease-out; }
+.modal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); }
+.modal-cabecera h2 { min-width: 0; }
 .modal-contenido { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); padding: var(--espacio-modal); overflow-y: auto; overscroll-behavior: contain; }
 .modal-contenido p { margin: 0; color: var(--muted); }
 .formulario-modal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
@@ -391,12 +405,9 @@ dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0
   .barra-superior-acciones .boton { padding-inline: 10px; }
   .menu summary { max-width: 172px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .encabezado { gap: 8px; margin-bottom: 10px; }
-  .encabezado h1 { font-size: 1.55rem; }
+  .encabezado h1 { font-size: 1.35rem; }
   .encabezado .acciones { width: 100%; gap: 6px; }
-  .encabezado .acciones .boton.primario { margin-left: auto; }
-  /* Detalle de lista: «Agregar producto» ocupa su propia fila arriba y las demás acciones se reparten la fila de abajo. */
-  .acciones-lista .boton.primario { order: -1; flex: 1 1 100%; margin-left: 0; }
-  .acciones-lista .boton:not(.primario) { flex: 1 1 0; padding-inline: 8px; }
+  .encabezado .acciones > .boton.primario { margin-left: auto; }
   .etiqueta { margin: 10px 0 20px; padding: 16px 16px 16px 40px; }
   .etiqueta::before { left: 16px; width: 12px; height: 12px; }
   .etiqueta-cifra { font-size: 2.45rem; }
@@ -429,7 +440,7 @@ dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0
 @media (max-width: 340px) {
   .grid2 { grid-template-columns: 1fr; gap: 8px; }
   .encabezado .acciones { width: 100%; }
-  .encabezado .acciones .boton { flex: 1; }
+  .encabezado .acciones > .boton { flex: 1; }
   .filtros { display: grid; grid-template-columns: 1fr; }
   .fila-producto-acciones { padding-left: 0; grid-column: 1 / -1; }
   .fila-producto-acciones .interruptor { margin-left: auto; }

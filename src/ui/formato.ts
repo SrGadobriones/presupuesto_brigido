@@ -27,3 +27,11 @@ export function fechaLocal(fecha: Date = new Date()): string {
 export function mensajeError(e: unknown, defecto: string): string {
   return e instanceof Error ? e.message : defecto;
 }
+
+/** "Gabriel Briones Aravena" → "GB": inicial del primer nombre y del primer apellido (con 4 o más palabras se asume nombre compuesto). */
+export function iniciales(nombre: string): string {
+  const p = nombre.trim().split(/\s+/).filter(Boolean);
+  if (p.length === 0) return '';
+  const apellido = p.length === 1 ? undefined : p.length === 3 ? p[1] : p.length === 2 ? p[1] : p[2];
+  return (p[0][0] + (apellido?.[0] ?? '')).toLocaleUpperCase('es');
+}

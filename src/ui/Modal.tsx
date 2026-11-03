@@ -6,6 +6,8 @@ interface Props {
   titulo: string;
   /** Se llama al pulsar Esc o al hacer clic en el fondo oscurecido. */
   onCerrar(): void;
+  /** Acción secundaria junto al título (p. ej. un botón de eliminar). */
+  accionTitulo?: ComponentChildren;
   /** Más ancho, para formularios largos (el contenido hace scroll dentro del modal). */
   ancho?: boolean;
   /** Acciones fijas al pie, fuera del área con scroll. Un botón de envío debe usar `form="id"`. */
@@ -16,7 +18,7 @@ interface Props {
 let contador = 0;
 
 /** Ventana modal sobre el elemento nativo <dialog>: Esc la cierra y el foco queda dentro. */
-export default function Modal({ abierto, titulo, onCerrar, ancho = false, pie, children }: Props) {
+export default function Modal({ abierto, titulo, onCerrar, accionTitulo, ancho = false, pie, children }: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const idTitulo = useRef(`modal-titulo-${++contador}`);
   /** true si el último pulsado empezó en el fondo y no dentro del contenido. */
@@ -53,7 +55,14 @@ export default function Modal({ abierto, titulo, onCerrar, ancho = false, pie, c
       }}
     >
       <div class="modal-contenido">
-        <h2 id={idTitulo.current}>{titulo}</h2>
+        {accionTitulo ? (
+          <div class="modal-cabecera">
+            <h2 id={idTitulo.current}>{titulo}</h2>
+            {accionTitulo}
+          </div>
+        ) : (
+          <h2 id={idTitulo.current}>{titulo}</h2>
+        )}
         {children}
       </div>
       {pie && <div class="modal-pie">{pie}</div>}

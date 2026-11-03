@@ -97,7 +97,6 @@ export default function Inicio() {
   return (
     <>
       <header class="encabezado">
-        <h1>Presupuesto Brígido</h1>
         <div class="acciones"><button class="boton chico" onClick={() => setImportando(true)}><IconoWhatsapp />Importar</button><button class="boton primario chico" onClick={() => setCreando(true)}>Nueva lista</button></div>
       </header>
       <Modal abierto={importando} titulo="Importar lista" onCerrar={cerrarImportar}>
@@ -118,7 +117,7 @@ export default function Inicio() {
       {errorDatos && <div class="aviso error" role="alert">{errorDatos}</div>}
       {cargando && !errorDatos && <Loader mensaje="Cargando tus listas…" />}
       {!cargando && !errorDatos && listas.length === 0 && <p class="vacio">Aún no hay listas. Crea la primera para empezar.</p>}
-      {listas.length > 0 && <div class="resumen-compras-fila"><p class="resumen-compras">Selecciona una o más listas para eliminarlas.</p><button class="boton chico fantasma" type="button" onClick={() => setSeleccion(todosSeleccionados ? [] : listas.map((lista) => lista.id))}>{todosSeleccionados ? 'Quitar selección' : 'Seleccionar todo'}</button></div>}
+      {listas.length > 0 && <div class="resumen-compras-fila"><button class="boton chico fantasma" type="button" style={{ marginLeft: 'auto' }} onClick={() => setSeleccion(todosSeleccionados ? [] : listas.map((lista) => lista.id))}>{todosSeleccionados ? 'Quitar selección' : 'Seleccionar todo'}</button></div>}
       {listas.map((l) => <div class={`lista-fila${seleccionados.includes(l.id) ? ' seleccionada' : ''}`} key={l.id}><input class="casilla-seleccion" type="checkbox" checked={seleccionados.includes(l.id)} aria-label={`Seleccionar: ${l.nombre}`} onChange={(e) => alternarLista(l.id, e.currentTarget.checked)} /><a class="lista" href={hrefLista(l.id)}><div class="lista-cabecera"><span class="lista-nombre">{l.nombre}</span><small class="muted">{l.productos} {l.productos === 1 ? 'producto' : 'productos'}</small></div><div class="lista-total"><span class="cifra">{formatearPrecio(l.total)}</span>{l.tope !== null && <span class="muted">de {formatearPrecio(l.tope)}</span>}</div><BarraPresupuesto total={l.total} comprado={l.comprado} tope={l.tope} leyenda /></a></div>)}
       {seleccionados.length > 0 && <><div class="relleno-barra-seleccion" /><BarraSeleccion cantidad={seleccionados.length} elemento="lista" onDuplicar={() => setConfirmandoDuplicar(true)} onEliminar={() => setConfirmandoEliminar(true)} onQuitar={() => setSeleccion([])} /></>}
       <ModalConfirmar abierto={confirmandoDuplicar} peligro={false} titulo={seleccionados.length === 1 ? '¿Duplicar esta lista?' : `¿Duplicar ${seleccionados.length} listas?`} mensaje={seleccionados.length === 1 ? 'Se creará una copia de la lista seleccionada con todos sus productos.' : 'Se creará una copia de cada lista seleccionada con todos sus productos.'} confirmar={seleccionados.length === 1 ? 'Duplicar lista' : 'Duplicar listas'} onConfirmar={() => void duplicarSeleccionadas()} onCancelar={() => setConfirmandoDuplicar(false)} />

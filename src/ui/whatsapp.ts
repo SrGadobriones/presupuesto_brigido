@@ -20,9 +20,12 @@ const limpiar = (t: string) => t.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
  *   Tope: $2.000.000
  *
  *   *Categoría*
- *   ⬜ producto x2 — $500 c/u · Media
- *   🔗 https://…
- *   📝 nota
+ *   [ ] producto x2 — $500 c/u · Media
+ *       Link: https://…
+ *       Nota: …
+ *
+ * Se usan marcadores de texto y no emojis: al abrir WhatsApp con wa.me los emojis llegan corruptos (�).
+ * Al leer se siguen aceptando los emojis (⬜ ✅ 🔗 📝) de textos creados con versiones anteriores.
  */
 export function textoWhatsapp(lista: Pick<Lista, 'nombre' | 'tope'>, productos: Producto[]): string {
   const salida: string[] = [`*${limpiar(lista.nombre)}*`];
@@ -36,10 +39,10 @@ export function textoWhatsapp(lista: Pick<Lista, 'nombre' | 'tope'>, productos: 
     salida.push('', `*${categoria}*`);
     for (const p of ps) {
       const precio = formatearPrecio(precioVigente(p)) + (p.cantidad > 1 ? ' c/u' : '');
-      salida.push(`${p.comprado ? '✅' : '⬜'} ${limpiar(p.nombre)} x${p.cantidad} — ${precio} · ${ETIQUETA_PRIORIDAD[p.prioridad]}`);
+      salida.push(`${p.comprado ? '[x]' : '[ ]'} ${limpiar(p.nombre)} x${p.cantidad} — ${precio} · ${ETIQUETA_PRIORIDAD[p.prioridad]}`);
       const enlace = enlaceVigente(p);
-      if (enlace) salida.push(`🔗 ${enlace}`);
-      if (p.notas.trim()) salida.push(`📝 ${p.notas.replace(/\s+/g, ' ').trim()}`);
+      if (enlace) salida.push(`    Link: ${enlace}`);
+      if (p.notas.trim()) salida.push(`    Nota: ${p.notas.replace(/\s+/g, ' ').trim()}`);
     }
   }
   salida.push('', `Total: ${formatearPrecio(totalProductos(productos))}`);
@@ -51,7 +54,7 @@ export const enlaceWhatsapp = (texto: string) => `https://wa.me/?text=${encodeUR
 /** "$1.234,5" → 1234.5 (punto = miles, coma = decimales, como en `formatearPrecio`). */
 const precioDeTexto = (t: string) => Number(t.replace(/[.\s]/g, '').replace(',', '.'));
 
-const LINEA_PRODUCTO = /^(?:(⬜|✅|☑️?|✔️?)|[-•])\s*(.+?)\s+x(\d+)\s*[—–-]\s*\$?\s*([\d.,]+)(?:\s*c\/u)?(?:\s*[·|(]\s*(alta|media|baja)\)?)?\s*$/i;
+const LINEA_PRODUCTO = /^(?:(⬜|✅|☑️?|✔️?|\[\s*[xX✓✔]?\s*\])|[-•])\s*(.+?)\s+x(\d+)\s*[—–-]\s*\$?\s*([\d.,]+)(?:\s*c\/u)?(?:\s*[·|(]\s*(alta|media|baja)\)?)?\s*$/i;
 
 /** Lee un texto en el formato de `textoWhatsapp`; lanza un error con mensaje legible si no hay productos. */
 export function leerTextoWhatsapp(texto: string): ListaTexto {
@@ -67,13 +70,15 @@ export function leerTextoWhatsapp(texto: string): ListaTexto {
       const [, marca, n, cant, precio, prio] = prod;
       productos.push({
         nombre: n.trim(), cantidad: Math.max(1, Number(cant)), categoria, prioridad: (prio?.toLowerCase() as Prioridad) ?? 'media',
-        precio: precioDeTexto(precio) || 0, link: '', notas: '', comprado: !!marca && marca !== '⬜',
+        precio: precioDeTexto(precio) || 0, link: '', notas: '', comprado: !!marca && marca !== '⬜' && !/^\[\s*\]$/.test(marca),
       });
       continue;
     }
     const ultimo = productos[productos.length - 1];
-    if (linea.startsWith('🔗') && ultimo) { ultimo.link = linea.slice(2).trim(); continue; }
-    if (linea.startsWith('📝') && ultimo) { ultimo.notas = linea.slice(2).trim(); continue; }
+    const enlace = /^(?:🔗|link\s*:)\s*(.*)$/iu.exec(linea);
+    if (enlace && ultimo) { ultimo.link = enlace[1].trim(); continue; }
+    const nota = /^(?:📝|nota\s*:)\s*(.*)$/iu.exec(linea);
+    if (nota && ultimo) { ultimo.notas = nota[1].trim(); continue; }
     const t = /^tope\s*:\s*\$?\s*([\d.,]+)/i.exec(linea);
     if (t) { const v = precioDeTexto(t[1]); tope = v > 0 ? v : null; continue; }
     if (/^total\s*:/i.test(linea)) continue;
