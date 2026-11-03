@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Presupuesto Brígido</string>
+    <string name="title_activity_main">Presupuesto Brígido</string>
+    <string name="package_name">com.srgadobriones.presupuesto</string>
+    <string name="custom_url_scheme">com.srgadobriones.presupuesto</string>
+</resources>

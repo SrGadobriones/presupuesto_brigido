@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "384154596",
+    "project_id": "presupuesto-brigido",
+    "storage_bucket": "presupuesto-brigido.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384154596:android:1683b85e63659cffdfe5f1",
+        "android_client_info": {
+          "package_name": "com.srgadobriones.presupuesto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "384154596-vqku4jnavt5s0tb60q6elvvp06160m9q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.srgadobriones.presupuesto",
+            "certificate_hash": "53e8e40b6b85da1bd4eabdef01605854b87f0960"
+          }
+        },
+        {
+          "client_id": "384154596-ide0vma3leedkq44fav5s2ktlmspr6b2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRtTso7D-1Q1vfYXsCXqbdpehNNndjl2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "384154596-ide0vma3leedkq44fav5s2ktlmspr6b2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
