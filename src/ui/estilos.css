@@ -289,6 +289,12 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .interruptor input:checked ~ .interruptor-texto { color: var(--ok); }
 
 /* Barra de acciones sobre la selección: flota fija al borde inferior de la ventana, centrada en la columna. */
+/* Wifi tachado: sin conexión. Mismo tamaño que el botón de tema que tiene al lado. */
+.indicador-conexion { display: inline-grid; place-items: center; width: var(--control-chico); height: var(--control-chico); border: 1px solid var(--excedido); border-radius: var(--radio); color: var(--excedido); background: color-mix(in srgb, var(--excedido) 10%, transparent); }
+/* Aviso «… eliminada · Deshacer» tras borrar. */
+.aviso-deshacer { position: fixed; z-index: 30; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 14px; width: max-content; max-width: calc(100vw - 32px); padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--texto); color: var(--fondo); font-size: 0.95rem; font-weight: 600; box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.5); animation: entra-aviso 0.2s ease both; }
+.aviso-deshacer button { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--etiqueta); color: var(--tinta); font: inherit; font-weight: 700; cursor: pointer; }
+@keyframes entra-aviso { from { opacity: 0; transform: translate(-50%, 12px); } }
 /* Aviso breve de «pulsa atrás otra vez para salir» (app Android). */
 .aviso-flotante { position: fixed; z-index: 30; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%); max-width: calc(100vw - 32px); padding: 10px 16px; border-radius: 999px; background: var(--texto); color: var(--fondo); font-size: 0.92rem; font-weight: 600; text-align: center; box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.5); pointer-events: none; }
 /* Botón «+» flotante: aparece al salir de pantalla el botón de agregar del encabezado. */

@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import { validarLista } from '../dominio/validar';
 import { useApp } from './contexto';
 import { useResumenListas } from './useDatos';
+import { programarEliminacion, useEliminaciones } from './eliminaciones';
 import { hrefLista, irA } from './ruta';
 import { importarTextoWhatsapp } from './whatsapp';
 import IconoWhatsapp from './IconoWhatsapp';
@@ -15,7 +16,9 @@ import ModalConfirmar from './ModalConfirmar';
 
 export default function Inicio() {
   const { repo, avisar } = useApp();
-  const { listas, cargando, error: errorDatos } = useResumenListas();
+  const { listas: todasLasListas, cargando, error: errorDatos } = useResumenListas();
+  const { ocultos } = useEliminaciones();
+  const listas = todasLasListas.filter((l) => !ocultos.has(l.id));
   const [creando, setCreando] = useState(false);
   const [nombre, setNombre] = useState('');
   const [tope, setTope] = useState('');
@@ -88,8 +91,14 @@ export default function Inicio() {
       avisar(mensajeError(e, 'No se pudo duplicar la lista'));
     }
   };
-  const eliminarSeleccionadas = async () => {
-    await Promise.all(seleccionados.map((id) => repo.eliminarLista(id)));
+  const eliminarSeleccionadas = () => {
+    const ids = [...seleccionados];
+    programarEliminacion({
+      ids,
+      mensaje: ids.length === 1 ? 'Lista eliminada' : `${ids.length} listas eliminadas`,
+      ejecutar: () => Promise.all(ids.map((id) => repo.eliminarLista(id))),
+      alFallar: (e) => avisar(mensajeError(e, 'No se pudo eliminar la lista')),
+    });
     setSeleccion([]);
     setConfirmandoEliminar(false);
   };
@@ -121,7 +130,7 @@ export default function Inicio() {
       {listas.map((l) => <div class={`lista-fila${seleccionados.includes(l.id) ? ' seleccionada' : ''}`} key={l.id}><input class="casilla-seleccion" type="checkbox" checked={seleccionados.includes(l.id)} aria-label={`Seleccionar: ${l.nombre}`} onChange={(e) => alternarLista(l.id, e.currentTarget.checked)} /><a class="lista" href={hrefLista(l.id)}><div class="lista-cabecera"><span class="lista-nombre">{l.nombre}</span><small class="muted">{l.productos} {l.productos === 1 ? 'producto' : 'productos'}</small></div><div class="lista-total"><span class="cifra">{formatearPrecio(l.total)}</span>{l.tope !== null && <span class="muted">de {formatearPrecio(l.tope)}</span>}</div><BarraPresupuesto total={l.total} comprado={l.comprado} tope={l.tope} leyenda /></a></div>)}
       {seleccionados.length > 0 && <><div class="relleno-barra-seleccion" /><BarraSeleccion cantidad={seleccionados.length} elemento="lista" onDuplicar={() => setConfirmandoDuplicar(true)} onEliminar={() => setConfirmandoEliminar(true)} onQuitar={() => setSeleccion([])} /></>}
       <ModalConfirmar abierto={confirmandoDuplicar} peligro={false} titulo={seleccionados.length === 1 ? '¿Duplicar esta lista?' : `¿Duplicar ${seleccionados.length} listas?`} mensaje={seleccionados.length === 1 ? 'Se creará una copia de la lista seleccionada con todos sus productos.' : 'Se creará una copia de cada lista seleccionada con todos sus productos.'} confirmar={seleccionados.length === 1 ? 'Duplicar lista' : 'Duplicar listas'} onConfirmar={() => void duplicarSeleccionadas()} onCancelar={() => setConfirmandoDuplicar(false)} />
-      <ModalConfirmar abierto={confirmandoEliminar} titulo={seleccionados.length === 1 ? '¿Eliminar esta lista?' : `¿Eliminar ${seleccionados.length} listas?`} mensaje={seleccionados.length === 1 ? 'Se eliminará la lista seleccionada con todos sus productos. Esta acción no se puede deshacer.' : 'Se eliminarán las listas seleccionadas con todos sus productos. Esta acción no se puede deshacer.'} confirmar={seleccionados.length === 1 ? 'Eliminar lista' : 'Eliminar listas'} onConfirmar={() => void eliminarSeleccionadas()} onCancelar={() => setConfirmandoEliminar(false)} />
+      <ModalConfirmar abierto={confirmandoEliminar} titulo={seleccionados.length === 1 ? '¿Eliminar esta lista?' : `¿Eliminar ${seleccionados.length} listas?`} mensaje={seleccionados.length === 1 ? 'Se eliminará la lista seleccionada con todos sus productos.' : 'Se eliminarán las listas seleccionadas con todos sus productos.'} confirmar={seleccionados.length === 1 ? 'Eliminar lista' : 'Eliminar listas'} onConfirmar={() => void eliminarSeleccionadas()} onCancelar={() => setConfirmandoEliminar(false)} />
     </>
   );
 }

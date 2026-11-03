@@ -1,17 +1,26 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, setDoc, writeBatch, type DocumentData, type Query, type QuerySnapshot } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, setDoc, writeBatch, type DocumentData, type Query, type QuerySnapshot } from 'firebase/firestore';
 import { firebase } from '../firebase/cliente'; import type { DatosLista, DatosProducto, Lista, Producto, Todo } from '../dominio/tipos'; import { validarLista, validarProducto } from '../dominio/validar'; import type { Repositorio } from './repositorio';
 const bytes=(x:unknown)=>x && typeof x==='object'&&'toUint8Array' in x?(x as {toUint8Array():Uint8Array}).toUint8Array():null;
 const lista=(id:string,d:DocumentData):Lista=>({id,nombre:d.nombre,tope:d.tope??null,creadaEn:d.creadaEn?.toDate?.().toISOString?.()??''});
 const producto=(listaId:string,id:string,d:DocumentData):Producto=>({id,listaId,nombre:d.nombre,cantidad:d.cantidad,categoria:d.categoria??'',prioridad:d.prioridad,notas:d.notas??'',link:d.link??'',comprado:!!d.comprado,opcionElegidaId:d.opcionElegidaId??null,opciones:d.opciones??[],tieneFoto:!!d.tieneFoto,miniatura:bytes(d.miniatura)});
 /** Tras iniciar sesión, la primera consulta puede salir antes de que Firestore tenga el token y ser rechazada; un listener muere con su primer error, así que se reintenta unas pocas veces. */
 const escuchar=<T,>(consulta:Query,mapear:(s:QuerySnapshot)=>T[],cb:(x:T[])=>void,alError?:(e:unknown)=>void)=>{let cancelado=false,intentos=0,baja=()=>{};const iniciar=()=>{baja=onSnapshot(consulta,s=>{intentos=0;cb(mapear(s))},e=>{if(!cancelado&&(e as {code?:string}).code==='permission-denied'&&intentos++<2){setTimeout(()=>{if(!cancelado)iniciar()},1000);return}alError?.(e)})};iniciar();return()=>{cancelado=true;baja()}};
+/**
+ * Sin conexión, Firestore aplica la escritura en su caché local (las pantallas se actualizan al instante) y la envía al volver
+ * internet, pero su promesa solo se cumple cuando el servidor la confirma. Esperarla bloquearía la interfaz, así que sin conexión
+ * no se espera. Con conexión sí se espera, para mostrar errores reales (p. ej. permisos).
+ */
+const confirmar=(escritura:Promise<unknown>):Promise<void>=>{
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){escritura.catch(e=>console.error('Escritura pendiente rechazada al reconectar',e));return Promise.resolve()}
+  return escritura.then(()=>{});
+};
 export class RepositorioFirestore implements Repositorio {
   constructor(private uid:string){} private listas=()=>collection(firebase().db,'usuarios',this.uid,'listas'); private productos=(l:string)=>collection(firebase().db,'usuarios',this.uid,'listas',l,'productos');
   escucharListas(cb:(x:Lista[])=>void,alError?:(e:unknown)=>void){return escuchar(this.listas(),s=>s.docs.map(x=>lista(x.id,x.data())),cb,alError)}
   escucharProductos(l:string,cb:(x:Producto[])=>void,alError?:(e:unknown)=>void){return escuchar(this.productos(l),s=>s.docs.map(x=>producto(l,x.id,x.data())),cb,alError)}
-  async crearLista(datos:DatosLista){const d=validarLista(datos);return (await addDoc(this.listas(),{...d,creadaEn:serverTimestamp()})).id}
-  async actualizarLista(id:string,datos:DatosLista){await setDoc(doc(this.listas(),id),validarLista(datos),{merge:true})}
-  async eliminarLista(id:string){const productos=await getDocs(this.productos(id));const batch=writeBatch(firebase().db);for(const p of productos.docs){const foto=doc(this.productos(id),p.id,'fotos','principal');batch.delete(foto);batch.delete(p.ref)}batch.delete(doc(this.listas(),id));await batch.commit()}
+  async crearLista(datos:DatosLista){const d=validarLista(datos);const ref=doc(this.listas());await confirmar(setDoc(ref,{...d,creadaEn:serverTimestamp()}));return ref.id}
+  async actualizarLista(id:string,datos:DatosLista){await confirmar(setDoc(doc(this.listas(),id),validarLista(datos),{merge:true}))}
+  async eliminarLista(id:string){const productos=await getDocs(this.productos(id));const batch=writeBatch(firebase().db);for(const p of productos.docs){const foto=doc(this.productos(id),p.id,'fotos','principal');batch.delete(foto);batch.delete(p.ref)}batch.delete(doc(this.listas(),id));await confirmar(batch.commit())}
   async guardarProducto(b:DatosProducto){
     const d=validarProducto(b);
     const esNuevo=!d.id;
@@ -24,11 +33,11 @@ export class RepositorioFirestore implements Repositorio {
     const batch=writeBatch(firebase().db);
     batch.set(ref,data,{merge:true});
     if(d.foto!==undefined){const f=doc(ref,'fotos','principal');d.foto?batch.set(f,{bytes:d.foto}):batch.delete(f)}
-    await batch.commit();
+    await confirmar(batch.commit());
     return ref.id;
   }
-  async eliminarProductos(l:string,ids:string[]){const b=writeBatch(firebase().db);ids.forEach(i=>{const r=doc(this.productos(l),i);b.delete(doc(r,'fotos','principal'));b.delete(r)});await b.commit()}
-  async marcarComprado(l:string,ids:string[],comprado:boolean){const b=writeBatch(firebase().db);ids.forEach(i=>b.set(doc(this.productos(l),i),{comprado},{merge:true}));await b.commit()}
+  async eliminarProductos(l:string,ids:string[]){const b=writeBatch(firebase().db);ids.forEach(i=>{const r=doc(this.productos(l),i);b.delete(doc(r,'fotos','principal'));b.delete(r)});await confirmar(b.commit())}
+  async marcarComprado(l:string,ids:string[],comprado:boolean){const b=writeBatch(firebase().db);ids.forEach(i=>b.set(doc(this.productos(l),i),{comprado},{merge:true}));await confirmar(b.commit())}
   async obtenerFoto(l:string,p:string){const s=await getDoc(doc(this.productos(l),p,'fotos','principal'));return s.exists()?bytes(s.data().bytes):null}
   async obtenerTodo(){const ls=await getDocs(this.listas());const listas=ls.docs.map(x=>lista(x.id,x.data()));const productos=(await Promise.all(listas.map(async l=>(await getDocs(this.productos(l.id))).docs.map(x=>producto(l.id,x.id,x.data()))))).flat();return{listas,productos}}
   async importarListas(todo:Todo){for(const l of todo.listas){const nuevo=await this.crearLista({nombre:l.nombre,tope:l.tope});for(const p of todo.productos.filter(x=>x.listaId===l.id))await this.guardarProducto({...p,id:undefined,listaId:nuevo})}}

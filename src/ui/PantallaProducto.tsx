@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Opcion, Prioridad } from '../dominio/tipos';
-import { useApp } from './contexto'; import { useProductos } from './useDatos';
+import { useApp } from './contexto'; import { programarEliminacion } from './eliminaciones'; import { useProductos } from './useDatos';
 import { hrefLista, irA } from './ruta'; import { ETIQUETA_PRIORIDAD, mensajeError, parsearNumero } from './formato';
 import Modal from './Modal'; import ModalConfirmar from './ModalConfirmar';
 
@@ -43,7 +43,7 @@ export default function PantallaProducto({ listaId, productoId }: { listaId: str
     volver();
     try { await repo.guardarProducto(borrador); } catch (x) { avisar(mensajeError(x, 'No se pudo guardar el producto')); }
   };
-  const eliminar = () => { setConfirmando(false); volver(); if (productoId) void repo.eliminarProductos(listaId, [productoId]).catch((x) => avisar(mensajeError(x, 'No se pudo eliminar el producto'))); };
+  const eliminar = () => { setConfirmando(false); volver(); if (productoId) programarEliminacion({ ids: [productoId], mensaje: 'Producto eliminado', ejecutar: () => repo.eliminarProductos(listaId, [productoId]), alFallar: (x) => avisar(mensajeError(x, 'No se pudo eliminar el producto')) }); };
 
   return <><Modal abierto titulo={productoId ? 'Editar producto' : 'Nuevo producto'} onCerrar={volver} ancho pie={<><span class="modal-pie-espacio" />{productoId && <button class="boton peligro" type="button" onClick={() => setConfirmando(true)}>Eliminar</button>}<button class="boton" type="button" onClick={volver}>Cancelar</button><button class="boton primario" type="submit" form="formulario-producto">Guardar</button></>}>
     <form id="formulario-producto" class="formulario-producto" onSubmit={(e) => void guardar(e)}>
@@ -51,5 +51,5 @@ export default function PantallaProducto({ listaId, productoId }: { listaId: str
       <div class="tarjeta"><strong>Opciones de tienda y precio</strong><label><input type="radio" checked={elegida === null} onChange={() => setElegida(null)} /> Automática (la más barata)</label>{opciones.map((o) => <div class="fila-opcion" key={o.id}><div class="grid2"><label class="campo"><span>Tienda</span><input value={o.tienda} onInput={(e) => setOpciones((x) => x.map((a) => a.id === o.id ? { ...a, tienda: e.currentTarget.value } : a))} /></label><label class="campo"><span>Precio</span><input value={textoPrecio[o.id] ?? String(o.precio)} inputMode="decimal" onInput={(e) => { const texto = e.currentTarget.value; setTextoPrecio((t) => ({ ...t, [o.id]: texto })); setOpciones((x) => x.map((a) => a.id === o.id ? { ...a, precio: parsearNumero(texto) ?? NaN } : a)); }} /></label></div><label><input type="radio" name="elegida" checked={elegida === o.id} onChange={() => setElegida(o.id)} /> Elegir esta</label><button class="boton chico peligro" type="button" onClick={() => setOpciones((x) => x.filter((a) => a.id !== o.id))}>Quitar</button></div>)}<button class="boton" type="button" onClick={() => setOpciones((x) => [...x, { id: oid(), tienda: '', precio: 0, link: '' }])}>Agregar opción</button></div>
       {error && <div class="aviso error">{error}</div>}
     </form>
-  </Modal><ModalConfirmar abierto={confirmando} titulo="¿Eliminar este producto?" mensaje="Esta acción no se puede deshacer." confirmar="Eliminar producto" onConfirmar={eliminar} onCancelar={() => setConfirmando(false)} /></>;
+  </Modal><ModalConfirmar abierto={confirmando} titulo="¿Eliminar este producto?" mensaje="Se eliminará este producto de la lista." confirmar="Eliminar producto" onConfirmar={eliminar} onCancelar={() => setConfirmando(false)} /></>;
 }
