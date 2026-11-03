@@ -1,0 +1,20 @@
+import { hrefInicio } from './ruta';
+import BotonTema from './BotonTema';
+import MenuDatos from './MenuDatos';
+
+/** Fila superior común a todas las pantallas: volver a las listas (si aplica) y los controles de la app. */
+export default function BarraSuperior({ conVolver, listaId }: { conVolver: boolean; listaId?: string }) {
+  return (
+    <nav class="barra-superior" aria-label="Navegación y ajustes">
+      {conVolver && (
+        <a class="migas" href={hrefInicio()}>
+          Listas
+        </a>
+      )}
+      <div class="acciones barra-superior-acciones">
+        <BotonTema />
+        <MenuDatos listaId={listaId} />
+      </div>
+    </nav>
+  );
+}

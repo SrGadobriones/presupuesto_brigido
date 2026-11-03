@@ -1,0 +1,25 @@
+---
+import Raiz from '../ui/Raiz';
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/instrument-sans';
+import '../ui/estilos.css';
+---
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Presupuesto Brígido</title>
+    <script is:inline>
+      // Aplica el tema guardado antes de pintar para evitar el parpadeo.
+      // La clave 'tema' debe coincidir con CLAVE_TEMA de src/ui/tema.ts.
+      try {
+        var tema = localStorage.getItem('tema');
+        if (tema === 'claro' || tema === 'oscuro') document.documentElement.setAttribute('data-tema', tema);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <Raiz client:only="preact" />
+  </body>
+</html>

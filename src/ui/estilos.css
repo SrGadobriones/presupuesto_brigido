@@ -1,0 +1,418 @@
+/* Presupuesto Brígido — la pieza central es la etiqueta de precio (.etiqueta); el resto es sobrio. */
+
+:root {
+  color-scheme: light dark;
+  --fuente-texto: 'Instrument Sans Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fuente-display: 'Bricolage Grotesque Variable', 'Instrument Sans Variable', system-ui, sans-serif;
+
+  --tinta: #16211d; /* texto sobre la etiqueta y sobre el botón principal, en ambos temas */
+  --etiqueta: #ffd23f;
+  --etiqueta-excedida: #ff9a8f;
+
+  --fondo: #f1f3ee;
+  --superficie: #fafbf8;
+  --texto: #16211d;
+  --muted: #5e6b65;
+  --borde: #d5dad3;
+  --cobalto: #2845d6;
+  --ok: #1f8a57;
+  --cerca: #b87a00;
+  --excedido: #c93c3c;
+
+  --radio: 10px;
+  --radio-grande: 18px;
+
+  /* Tamaños que se encogen cuando hay poco espacio: ver "Adaptación al espacio disponible" al final. */
+  --control: 44px; /* alto de botones, campos y filas de menú */
+  --control-chico: 40px;
+  --pad-boton: 16px;
+  --espacio: 16px; /* margen base de la página */
+  --espacio-modal: 20px; /* relleno interior de los modales */
+  --gap: 12px;
+  --pad-pie: 14px;
+  --pad-etiqueta: 18px;
+  --miniatura: 56px;
+  --alto-modal: 92dvh;
+  --sangria: 12px; /* margen lateral interior de las filas, para que precios y círculos no toquen el borde */
+}
+
+/* Sin atributo `data-tema` manda el sistema; `claro` y `oscuro` lo fuerzan. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema]) {
+    --fondo: #0e1714;
+    --superficie: #15201c;
+    --texto: #e7ede8;
+    --muted: #93a39b;
+    --borde: #2a3832;
+    --cobalto: #8fa3ff;
+    --ok: #4cc088;
+    --cerca: #e3b02e;
+    --excedido: #ff7a72;
+  }
+}
+:root[data-tema='claro'] {
+  color-scheme: light;
+}
+:root[data-tema='oscuro'] {
+  color-scheme: dark;
+  --fondo: #0e1714;
+  --superficie: #15201c;
+  --texto: #e7ede8;
+  --muted: #93a39b;
+  --borde: #2a3832;
+  --cobalto: #8fa3ff;
+  --ok: #4cc088;
+  --cerca: #e3b02e;
+  --excedido: #ff7a72;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font: 1rem/1.45 var(--fuente-texto);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2 { font-family: var(--fuente-display); margin: 0; letter-spacing: -0.02em; }
+h1 { font-size: clamp(1.4rem, min(6vw, 7vh), 2.1rem); font-weight: 700; line-height: 1.1; }
+h2 { font-size: 1.05rem; font-weight: 650; }
+a { color: var(--cobalto); text-decoration: none; }
+:focus-visible { outline: 3px solid var(--cobalto); outline-offset: 2px; border-radius: 4px; }
+
+.app { max-width: 640px; margin: 0 auto; padding: var(--espacio) var(--espacio) calc(var(--espacio) * 3); }
+
+/* ---------- Acceso ---------- */
+.acceso { width: min(100% - 32px, 940px); min-height: 100dvh; margin: 0 auto; padding: clamp(32px, 7vw, 88px) 0; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr); align-items: center; gap: clamp(36px, 8vw, 100px); }
+.acceso-presentacion { max-width: 530px; }
+.acceso-sello { width: 54px; height: 54px; display: grid; place-items: center; margin-bottom: 28px; border-radius: 18px 18px 18px 4px; background: var(--etiqueta); color: var(--tinta); box-shadow: 5px 5px 0 color-mix(in srgb, var(--etiqueta) 38%, transparent); font-size: 1.45rem; }
+.acceso-eyebrow { margin: 0 0 10px; color: var(--cerca); font-size: .82rem; font-weight: 750; letter-spacing: .11em; text-transform: uppercase; }
+.acceso-presentacion h1 { font-size: clamp(2.65rem, 6vw, 4.8rem); line-height: .98; letter-spacing: -.065em; }
+.acceso-presentacion h1 em { color: var(--etiqueta); font-style: normal; }
+.acceso-bajada { max-width: 440px; margin: 22px 0 28px; color: var(--muted); font-size: 1.08rem; }
+.acceso-beneficios { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; color: var(--texto); font-weight: 540; }
+.acceso-beneficios span { display: inline-grid; place-items: center; width: 21px; height: 21px; margin-right: 8px; border-radius: 50%; background: color-mix(in srgb, var(--ok) 20%, transparent); color: var(--ok); font-size: .78rem; }
+.acceso-tarjeta { padding: clamp(26px, 5vw, 42px); border: 1px solid var(--borde); border-radius: 24px; background: color-mix(in srgb, var(--superficie) 92%, transparent); box-shadow: 0 24px 55px -34px rgb(0 0 0 / .75); }
+.acceso-marca { display: flex; align-items: center; gap: 9px; margin-bottom: 46px; color: var(--muted); font-weight: 700; font-size: .9rem; }
+.acceso-marca-icono { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--etiqueta); color: var(--tinta); font-family: var(--fuente-display); font-size: 1.1rem; }
+.acceso-tarjeta h2 { font-size: 1.65rem; }
+.acceso-tarjeta > p { margin: 8px 0 28px; color: var(--muted); }
+.acceso-google { width: 100%; min-height: 52px; border-color: var(--borde); background: var(--superficie); font-weight: 700; }
+.acceso-google:hover { border-color: var(--cobalto); background: color-mix(in srgb, var(--cobalto) 8%, var(--superficie)); }
+.acceso-google svg { width: 20px; height: 20px; }
+.acceso-tarjeta small { display: block; margin-top: 18px; color: var(--muted); text-align: center; line-height: 1.4; }
+@media (max-width: 700px) { .acceso { grid-template-columns: 1fr; gap: 36px; padding-block: 44px; } .acceso-presentacion { max-width: none; } .acceso-sello { margin-bottom: 22px; } .acceso-marca { margin-bottom: 30px; } }
+.encabezado { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--gap); margin-bottom: var(--espacio); }
+.fila-entre { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.muted { color: var(--muted); }
+.vacio { color: var(--muted); text-align: center; padding: calc(var(--espacio) * 2) 0; }
+.migas { display: inline-block; padding: 4px 0; font-weight: 550; }
+/* Fila superior: "‹ Listas" a la izquierda, tema y Datos a la derecha (siempre en el mismo sitio). */
+.barra-superior { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); min-height: var(--control-chico); margin-bottom: var(--gap); }
+.barra-superior-acciones { margin-left: auto; flex-wrap: nowrap; }
+.migas::before { content: '‹ '; }
+
+/* ---------- Botones y campos ---------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--control);
+  padding: 0 var(--pad-boton);
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  color: var(--texto);
+  border-radius: var(--radio);
+  font: 550 1rem/1 var(--fuente-texto);
+  cursor: pointer;
+}
+.boton:active { transform: translateY(1px); }
+.boton.primario { background: var(--etiqueta); border-color: var(--tinta); color: var(--tinta); font-weight: 700; box-shadow: 0 2px 0 var(--tinta); }
+.boton.primario:active { box-shadow: 0 0 0 var(--tinta); transform: translateY(2px); }
+.boton.peligro { color: var(--excedido); border-color: var(--excedido); background: transparent; }
+.boton.chico { min-height: var(--control-chico); padding: 0 12px; font-size: 0.92rem; }
+.boton.icono { width: var(--control-chico); padding: 0; font-size: 1.1rem; }
+.boton.fantasma { background: transparent; border-color: transparent; }
+.boton:disabled { opacity: 0.45; cursor: not-allowed; }
+.boton:disabled:active { transform: none; }
+.acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* Campo de enlace con su botón "Abrir" fuera del campo, alineado con el borde inferior del input. */
+.campo-enlace { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+
+.campo { display: grid; gap: 4px; min-width: 0; }
+.campo > span { font-size: 0.85rem; color: var(--muted); }
+input, select, textarea {
+  width: 100%;
+  min-height: var(--control);
+  font: inherit;
+  color: var(--texto);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 8px 12px;
+}
+textarea { min-height: calc(var(--control) * 2); resize: vertical; }
+input[type='radio'] { width: 20px; min-height: 20px; accent-color: var(--cobalto); vertical-align: -4px; margin-right: 6px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+/* ---------- Paneles (formularios, edición) ---------- */
+.tarjeta {
+  display: block;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-grande);
+  padding: 16px;
+  margin-bottom: 16px;
+  color: inherit;
+}
+.tarjeta > * + * { margin-top: 12px; }
+.tarjeta > strong:first-child { display: block; font-family: var(--fuente-display); font-size: 1.05rem; font-weight: 650; }
+.tarjeta > small { display: block; margin-top: 4px; }
+.tarjeta > label { display: block; }
+summary { cursor: pointer; font-weight: 650; min-height: 24px; }
+.eliminar-lista { position: absolute; top: 10px; right: 10px; }
+
+/* ---------- Presupuesto (barra) ---------- */
+.progreso { height: 10px; background: color-mix(in srgb, var(--texto) 14%, transparent); border-radius: 999px; overflow: hidden; }
+.progreso-barra { height: 100%; border-radius: 999px; transform-origin: left; animation: llenar 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.progreso-barra.ok { background: var(--ok); }
+.progreso-barra.cerca { background: var(--cerca); }
+.progreso-barra.excedido { background: var(--excedido); }
+.texto-excedido { color: var(--excedido); font-weight: 600; }
+@keyframes llenar { from { transform: scaleX(0); } }
+
+/* ---------- Inicio: listas ---------- */
+.lista { display: grid; gap: 8px; padding: 16px 0; border-top: 1px solid var(--borde); color: inherit; }
+.lista:last-of-type { border-bottom: 1px solid var(--borde); margin-bottom: 20px; }
+.lista-fila { display: flex; align-items: center; gap: var(--gap); }
+.lista-fila .lista { flex: 1; min-width: 0; }
+.lista-fila.seleccionada { background: color-mix(in srgb, var(--cobalto) 10%, transparent); }
+.lista:hover .lista-nombre { text-decoration: underline; text-underline-offset: 3px; }
+.lista-cabecera { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.lista-nombre { font-family: var(--fuente-display); font-size: 1.2rem; font-weight: 650; letter-spacing: -0.01em; }
+.lista-total { display: flex; align-items: baseline; gap: 8px; }
+.cifra { font-family: var(--fuente-display); font-size: clamp(1.5rem, min(8vw, 7vh), 1.9rem); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+/* ---------- Detalle: etiqueta de precio ---------- */
+.etiqueta {
+  position: sticky;
+  top: 8px;
+  z-index: 4;
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 20px;
+  padding: var(--pad-etiqueta) var(--pad-etiqueta) var(--pad-etiqueta) 44px;
+  background: var(--etiqueta);
+  color: var(--tinta);
+  border-radius: 8px var(--radio-grande) var(--radio-grande) 8px;
+  box-shadow: 0 6px 18px -10px rgb(0 0 0 / 0.45);
+}
+.etiqueta.excedido { background: var(--etiqueta-excedida); }
+/* Agujero de la etiqueta */
+.etiqueta::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--fondo);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
+}
+.etiqueta-cuerpo { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.etiqueta-rotulo { display: block; font-size: 0.85rem; font-weight: 600; opacity: 0.75; }
+.etiqueta-cifra { font-family: var(--fuente-display); font-size: clamp(1.8rem, min(11vw, 9vh), 3rem); font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.etiqueta-lado { display: grid; justify-items: end; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.etiqueta .progreso { background: rgb(22 33 29 / 0.2); }
+.etiqueta .progreso-barra { background: var(--tinta); }
+.etiqueta .texto-excedido { color: var(--tinta); }
+
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; margin: -8px 0 4px; }
+.filtros select { flex: 1 1 0; min-width: 0; width: auto; }
+
+.grupo-cabecera { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: calc(var(--espacio) * 1.5) 0 4px; padding: 0 var(--sangria) 6px; border-bottom: 2px solid var(--texto); }
+.grupo-titulo { font-size: 1.05rem; }
+.grupo-cabecera .precio { color: var(--muted); font-weight: 600; }
+
+/* ---------- Productos ---------- */
+.fila-producto { display: flex; align-items: center; gap: var(--gap); padding: var(--gap) var(--sangria); border-bottom: 1px solid var(--borde); }
+/* Se atenúa lo que identifica al producto comprado; el interruptor y la selección quedan a plena intensidad. */
+.fila-producto.comprado .miniatura,
+.fila-producto.comprado .fila-producto-texto strong,
+.fila-producto.comprado .precio { opacity: 0.55; }
+.fila-producto.comprado strong { text-decoration: line-through; }
+.fila-producto.seleccionado { background: color-mix(in srgb, var(--cobalto) 10%, transparent); }
+.resumen-compras-fila { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); flex-wrap: wrap; margin: 0 0 4px; }
+.resumen-compras { margin: 0; font-size: 0.92rem; flex: 1 1 9rem; }
+
+/* Selección (círculo a la izquierda): sirve para eliminar o marcar varios a la vez. */
+.casilla-seleccion {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  min-height: 28px;
+  height: 28px;
+  margin: 0; /* el navegador añade un margen propio a los checkbox */
+  padding: 0;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.casilla-seleccion:checked { background: var(--cobalto); border-color: var(--cobalto); }
+.casilla-seleccion:checked::after { content: ''; width: 7px; height: 12px; margin-top: -2px; border: solid var(--fondo); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+
+/* Interruptor "Comprado" (columna entre el texto y el precio). */
+.interruptor { position: relative; flex: none; display: grid; justify-items: center; gap: 3px; cursor: pointer; }
+.interruptor input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+.interruptor-pista { position: relative; width: 44px; height: 26px; border-radius: 999px; background: color-mix(in srgb, var(--texto) 22%, transparent); transition: background 0.15s; }
+.interruptor-pista::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / 0.35); transition: transform 0.15s; }
+.interruptor input:checked + .interruptor-pista { background: var(--ok); }
+.interruptor input:checked + .interruptor-pista::after { transform: translateX(18px); }
+.interruptor input:focus-visible + .interruptor-pista { outline: 3px solid var(--cobalto); outline-offset: 2px; }
+.interruptor-texto { font-size: 0.68rem; font-weight: 600; color: var(--muted); line-height: 1; }
+.interruptor input:checked ~ .interruptor-texto { color: var(--ok); }
+
+/* Barra de acciones sobre la selección: flota fija al borde inferior de la ventana, centrada en la columna. */
+.barra-seleccion-capa { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; justify-content: center; padding: 0 var(--espacio) max(12px, env(safe-area-inset-bottom)); pointer-events: none; }
+.barra-seleccion { pointer-events: auto; width: 100%; max-width: calc(640px - var(--espacio) * 2); display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap); padding: 10px 12px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); box-shadow: 0 12px 32px -10px rgb(0 0 0 / 0.65); }
+/* Pantallas angostas: contador y "Quitar selección" arriba, las dos acciones debajo (2 líneas en vez de 3). */
+@media (max-width: 480px) {
+  .barra-seleccion > strong { order: 1; }
+  .barra-seleccion-espacio { display: none; }
+  .barra-seleccion-quitar { order: 2; margin-left: auto; }
+  .barra-seleccion-marcar { order: 3; flex: 1 1 55%; }
+  .barra-seleccion-eliminar { order: 4; }
+}
+/* Espacio al final de la lista para que la barra flotante no tape la última fila. */
+.relleno-barra-seleccion { height: 7.5rem; }
+.barra-seleccion-espacio { flex: 1 1 0; min-width: 0; }
+.fila-producto-enlace { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; color: inherit; }
+.fila-producto-texto { flex: 1; min-width: 0; display: grid; gap: 2px; }
+/* El nombre puede ocupar hasta dos líneas antes de cortarse con "…" (los nombres de tienda suelen ser largos). */
+.fila-producto-texto strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-weight: 600; line-height: 1.25; }
+.fila-producto-texto small { display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.miniatura { width: var(--miniatura); height: var(--miniatura); border-radius: var(--radio); object-fit: cover; background: var(--borde); flex: none; }
+.miniatura.vacia { display: grid; place-items: center; font-size: 1.4rem; }
+.precio { font-family: var(--fuente-display); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip { white-space: nowrap; font-size: 0.75rem; font-weight: 600; border-radius: 999px; padding: 1px 8px; border: 1px solid var(--borde); color: var(--muted); }
+.chip.alta { color: var(--excedido); border-color: var(--excedido); }
+.chip.baja, .chip.ok { color: var(--ok); border-color: var(--ok); }
+
+/* Prioridad de un producto: punto + texto. Rojo = alta, ámbar = media, azul = baja (el verde queda para "comprado"). */
+.prioridad { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 0.75rem; font-weight: 600; line-height: 1.4; padding: 1px 9px 1px 8px; border: 1px solid; border-radius: 999px; }
+.prioridad::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.prioridad.alta { color: var(--excedido); border-color: color-mix(in srgb, var(--excedido) 50%, transparent); }
+.prioridad.media { color: var(--cerca); border-color: color-mix(in srgb, var(--cerca) 50%, transparent); }
+.prioridad.baja { color: var(--cobalto); border-color: color-mix(in srgb, var(--cobalto) 50%, transparent); }
+.prioridad-columna { flex: none; width: 4.2rem; justify-content: center; }
+.enlace-columna { flex: none; width: 5rem; }
+
+/* Abrir + prioridad + interruptor forman un grupo: en la misma línea que el nombre en pantallas anchas… */
+.fila-producto-acciones { display: flex; align-items: center; gap: var(--gap); flex: none; }
+/* Ancho mínimo fijo para el precio: así las columnas de Abrir, prioridad e interruptor quedan alineadas entre filas. */
+@media (min-width: 481px) {
+  .fila-producto > .precio { min-width: 4.4rem; text-align: right; }
+}
+
+/* …y en una segunda línea bajo el nombre en las angostas, para no apretar el título. */
+@media (max-width: 480px) {
+  .fila-producto { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 8px; row-gap: 6px; }
+  .fila-producto-acciones { grid-column: 2 / -1; grid-row: 2; gap: 8px; padding-left: calc(var(--miniatura) + 8px); }
+  .fila-producto-acciones .interruptor { margin-left: auto; }
+  .enlace-columna, .prioridad-columna { width: auto; }
+}
+
+/* ---------- Formulario de producto ---------- */
+.formulario-producto { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.formulario-producto > .tarjeta { margin: 0; padding: 16px 0 0; border: 0; border-top: 1px solid var(--borde); border-radius: 0; background: transparent; }
+.fila-opcion { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--fondo); }
+.fila-opcion.mas-barata { box-shadow: inset 4px 0 0 var(--ok); }
+.fila-opcion .fila-entre { flex-wrap: wrap; align-items: center; }
+.fila-opcion .acciones { margin-left: auto; }
+.fila-opcion .chip { margin-left: 6px; }
+/* Pie del modal: acciones a la derecha, siempre visibles y fuera del área con scroll. */
+.modal-pie { flex: none; display: flex; align-items: center; gap: 8px; padding: var(--pad-pie) var(--espacio-modal); border-top: 1px solid var(--borde); background: var(--superficie); }
+.modal-pie .boton { flex: none; white-space: nowrap; }
+.modal-pie-espacio { flex: 1; min-width: 0; }
+
+/* ---------- Avisos y menú ---------- */
+.aviso { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: var(--radio); margin-bottom: 12px; background: var(--superficie); border: 1px solid var(--borde); }
+.aviso.error { border-color: var(--excedido); box-shadow: inset 4px 0 0 var(--excedido); color: var(--texto); }
+
+.loader { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 124px; color: var(--muted); font-weight: 550; }
+.loader-compacto { min-height: 0; }
+.loader-spin { width: 22px; height: 22px; flex: none; border: 3px solid var(--borde); border-top-color: var(--acento); border-radius: 50%; animation: loader-girar 0.72s linear infinite; }
+@keyframes loader-girar { to { transform: rotate(360deg); } }
+
+.menu { position: relative; }
+.menu summary { list-style: none; display: inline-flex; align-items: center; min-height: var(--control-chico); padding: 0 12px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie); font-weight: 550; font-size: 0.92rem; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu-panel { position: absolute; right: 0; z-index: 8; margin-top: 6px; min-width: 220px; width: max-content; max-width: calc(100vw - var(--espacio) * 2); display: grid; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); overflow: hidden; box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.5); }
+.menu-panel button { white-space: nowrap; text-align: left; min-height: var(--control); padding: 0 14px; border: 0; background: transparent; color: var(--texto); font: inherit; cursor: pointer; }
+.menu-panel button:hover { background: var(--fondo); }
+.menu-panel .menu-separador { border-top: 1px solid var(--borde); }
+
+/* ---------- Modal de confirmación ---------- */
+body:has(dialog[open]) { overflow: hidden; }
+dialog.modal { width: min(92vw, 420px); max-height: var(--alto-modal); padding: 0; overflow: hidden; border: 1px solid var(--borde); border-radius: var(--radio-grande); background: var(--superficie); color: var(--texto); box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.6); }
+dialog.modal::backdrop { background: rgb(8 14 12 / 0.6); }
+dialog.modal.ancho { width: min(94vw, 600px); }
+dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0.16s ease-out; }
+.modal-contenido { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); padding: var(--espacio-modal); overflow-y: auto; overscroll-behavior: contain; }
+.modal-contenido p { margin: 0; color: var(--muted); }
+.formulario-modal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.modal-acciones { justify-content: flex-end; margin-top: 4px; }
+@keyframes aparece { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+
+/* ---------- Adaptación al espacio disponible ----------
+   Cada regla solo redefine las variables de tamaño de :root; los componentes no cambian.
+   Los controles bajan de 44 px solo cuando el espacio lo exige (WCAG 2.2 pide un mínimo de 24 px). */
+
+/* Ancho reducido (móvil en vertical): menos relleno horizontal. */
+@media (max-width: 400px) {
+  :root { --pad-boton: 12px; --espacio-modal: 16px; --pad-pie: 12px; --miniatura: 48px; --sangria: 8px; }
+  .modal-pie { gap: 6px; }
+  .fila-producto, .fila-producto-enlace { gap: 8px; }
+  .interruptor-texto { display: none; } /* en pantallas angostas queda solo el interruptor */
+}
+
+/* Poca altura (móvil en horizontal, ventanas bajas): todo más compacto y el modal usa casi toda la pantalla. */
+@media (max-height: 560px) {
+  :root {
+    --control: 38px;
+    --control-chico: 34px;
+    --espacio: 12px;
+    --espacio-modal: 14px;
+    --gap: 8px;
+    --pad-pie: 10px;
+    --pad-etiqueta: 12px;
+    --miniatura: 44px;
+    --alto-modal: 96dvh;
+  }
+  .etiqueta { position: static; } /* fija solo si hay altura de sobra */
+  .etiqueta, .encabezado { margin-bottom: var(--gap); }
+}
+
+/* Muy poca altura (teclado abierto, ventanas diminutas). */
+@media (max-height: 400px) {
+  :root {
+    --control: 34px;
+    --control-chico: 30px;
+    --espacio-modal: 12px;
+    --gap: 6px;
+    --pad-pie: 8px;
+    --pad-boton: 12px;
+    --miniatura: 40px;
+  }
+  .boton, input, select, textarea { font-size: 0.92rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
