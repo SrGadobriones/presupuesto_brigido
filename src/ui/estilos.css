@@ -213,11 +213,13 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .etiqueta::before {
   content: '';
   position: absolute;
-  left: 14px;
+  left: 18px;
   top: 50%;
-  width: 14px;
-  height: 14px;
-  margin-top: -7px;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  transform: translateY(-50%);
+  box-sizing: border-box;
   border-radius: 50%;
   background: var(--fondo);
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
@@ -377,9 +379,54 @@ dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0
 /* Ancho reducido (móvil en vertical): menos relleno horizontal. */
 @media (max-width: 400px) {
   :root { --pad-boton: 12px; --espacio-modal: 16px; --pad-pie: 12px; --miniatura: 48px; --sangria: 8px; }
-  .modal-pie { gap: 6px; }
+  .app { padding: 12px 18px calc(var(--espacio) * 3); }
+  .barra-superior { min-height: 34px; margin-bottom: 8px; }
+  .barra-superior-acciones { gap: 6px; }
+  .barra-superior-acciones .boton { padding-inline: 10px; }
+  .menu summary { max-width: 172px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .encabezado { gap: 8px; margin-bottom: 10px; }
+  .encabezado h1 { font-size: 1.55rem; }
+  .encabezado .acciones { width: 100%; gap: 6px; }
+  .encabezado .acciones .boton.primario { margin-left: auto; }
+  .etiqueta { margin: 10px 0 20px; padding: 16px 16px 16px 40px; }
+  .etiqueta::before { left: 16px; width: 12px; height: 12px; }
+  .etiqueta-cifra { font-size: 2.45rem; }
+  .resumen-compras-fila { margin-bottom: 10px; }
+  .resumen-compras { font-size: 0.86rem; }
+  .grupo-cabecera { margin-top: 16px; padding-bottom: 5px; }
+  .fila-producto { padding-block: 11px; }
+  .fila-producto-acciones { min-height: 34px; align-items: center; }
+  .fila-producto-acciones .boton.chico { min-height: 34px; }
+  .prioridad { font-size: 0.78rem; }
+  .lista-fila { gap: 8px; }
+  .lista-fila .lista { padding-block: 13px; }
+  .lista-cabecera { gap: 8px; }
+  .lista-nombre { font-size: 1.08rem; }
+  .lista-total .cifra { font-size: 1.65rem; }
+  .menu-panel { right: -2px; min-width: min(220px, calc(100vw - 36px)); }
+  dialog.modal, dialog.modal.ancho { width: calc(100vw - 24px); max-height: 94dvh; border-radius: 16px; }
+  .modal-contenido { padding: 16px; gap: 12px; }
+  .modal-pie { gap: 6px; padding: 10px 16px max(10px, env(safe-area-inset-bottom)); }
+  .modal-pie .boton { min-height: 40px; padding-inline: 11px; font-size: 0.9rem; }
+  .modal-pie .boton.primario { flex: 1; }
+  .formulario-producto { gap: 12px; }
+  .formulario-producto > .tarjeta { padding-top: 12px; }
+  .fila-opcion { padding: 10px; }
   .fila-producto, .fila-producto-enlace { gap: 8px; }
   .interruptor-texto { display: none; } /* en pantallas angostas queda solo el interruptor */
+}
+
+/* Teléfonos muy estrechos: se prioriza lectura y controles táctiles antes que dos columnas. */
+@media (max-width: 340px) {
+  .grid2 { grid-template-columns: 1fr; gap: 8px; }
+  .encabezado .acciones { width: 100%; }
+  .encabezado .acciones .boton { flex: 1; }
+  .filtros { display: grid; grid-template-columns: 1fr; }
+  .fila-producto-acciones { padding-left: 0; grid-column: 1 / -1; }
+  .fila-producto-acciones .interruptor { margin-left: auto; }
+  .modal-pie-espacio { display: none; }
+  .modal-pie { flex-wrap: wrap; }
+  .modal-pie .boton { flex: 1 1 auto; }
 }
 
 /* Poca altura (móvil en horizontal, ventanas bajas): todo más compacto y el modal usa casi toda la pantalla. */
