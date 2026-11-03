@@ -27,6 +27,8 @@ export function mensajeErrorAcceso(e: unknown, dominio: string = location.hostna
     case 'auth/invalid-api-key':
       return 'La clave de Firebase no es válida. Cópiala de nuevo desde la consola de Firebase a src/firebase/config.ts.';
     default:
-      return `No se pudo iniciar sesión con Google (${codigo ?? 'error desconocido'}).`;
+      // Los errores del plugin nativo (app Android) traen un mensaje útil además del código.
+      const detalle = typeof e === 'object' && e !== null && typeof (e as { message?: unknown }).message === 'string' ? (e as { message: string }).message : '';
+      return `No se pudo iniciar sesión con Google (${codigo ?? 'error desconocido'}${detalle ? `: ${detalle}` : ''}).`;
   }
 }

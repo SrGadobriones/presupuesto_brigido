@@ -43,10 +43,10 @@ const carga = (colorFondo) => `<rect width="2732" height="2732" fill="${colorFon
 
 await Promise.all([
   // Icono clásico (sin capas): fondo claro con el sello; Android le aplica su máscara.
-  guardar('icon-only.png', fondo + sello(520)),
-  // Icono adaptable: fondo liso + sello dentro de la zona segura (~66 % central).
+  guardar('icon-only.png', fondo + sello(820)),
+  // Icono adaptable: capacitor-assets reduce las capas al 67 % para la zona segura, así que el sello debe llenar casi todo el lienzo.
   guardar('icon-background.png', fondo),
-  guardar('icon-foreground.png', sello(470)),
+  guardar('icon-foreground.png', sello(820)),
   guardar('splash.png', carga(FONDO), 2732),
   guardar('splash-dark.png', carga('#0e1714'), 2732),
 ]);
