@@ -109,10 +109,14 @@ a { color: var(--cobalto); text-decoration: none; }
 .migas { display: inline-block; padding: 4px 0; font-weight: 550; }
 /* Fila superior: "‹ Listas" a la izquierda, tema y Datos a la derecha (siempre en el mismo sitio). */
 .barra-superior { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); min-height: var(--control-chico); margin-bottom: var(--gap); }
-.barra-superior-acciones { margin-left: auto; flex-wrap: nowrap; }
+.barra-superior .barra-superior-acciones { margin-left: auto; flex: none; flex-wrap: nowrap; }
 /* Título de la app (inicio): comparte fila con el tema y la cuenta, que se quedan pegados a la derecha. */
 .barra-superior-titulo { flex: 1 1 auto; min-width: 0; font-size: clamp(1.25rem, 5.2vw, 1.9rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .migas::before { content: '‹ '; }
+/* Logo (el sello amarillo de la marca) junto al título de la app. */
+.barra-superior-titulo { display: flex; align-items: center; gap: 10px; }
+.barra-superior-texto { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.marca-icono { flex: none; display: grid; place-items: center; width: 1.45em; height: 1.45em; border-radius: 0.5em 0.5em 0.5em 0.14em; background: var(--etiqueta); color: var(--tinta); box-shadow: 0.1em 0.1em 0 color-mix(in srgb, var(--etiqueta) 38%, transparent); font-size: 0.8em; line-height: 1; }
 
 /* ---------- Botones y campos ---------- */
 .boton {
@@ -385,6 +389,10 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .menu-panel button { white-space: nowrap; text-align: left; min-height: var(--control); padding: 0 14px; border: 0; background: transparent; color: var(--texto); font: inherit; cursor: pointer; }
 .menu-panel button:hover { background: var(--fondo); }
 .menu-panel .menu-separador { border-top: 1px solid var(--borde); }
+.menu-panel .menu-submenu-titulo { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.menu-panel .menu-submenu { display: grid; background: var(--fondo); }
+.menu-panel .menu-submenu button { padding-left: 28px; }
+.menu-panel .menu-submenu button:hover { background: color-mix(in srgb, var(--texto) 8%, var(--fondo)); }
 
 /* ---------- Modal de confirmación ---------- */
 body:has(dialog[open]) { overflow: hidden; }
@@ -398,17 +406,29 @@ dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0
 .modal-contenido p { margin: 0; color: var(--muted); }
 .formulario-modal { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .modal-acciones { justify-content: flex-end; margin-top: 4px; }
+/* Acerca de: el sello de la marca, el nombre y la versión juntos; el copyright aparte y atenuado. */
+.acerca { display: flex; align-items: center; gap: 16px; padding-bottom: 4px; }
+.acerca-sello { flex: none; width: 52px; height: 52px; margin: 0 6px 0 0; font-size: 1.4rem; }
+.acerca-texto { display: grid; justify-items: start; gap: 6px; min-width: 0; }
+.acerca-nombre { font-family: var(--fuente-display); font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: var(--texto); }
+.acerca-version { font-variant-numeric: tabular-nums; }
+.modal-contenido p.acerca-derechos { margin-top: 4px; padding-top: 14px; border-top: 1px solid var(--borde); font-size: 0.85rem; }
 @keyframes aparece { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
 
 /* ---------- Escritorio ----------
    Solo desde 1024 px: en pantallas menores los contenedores de abajo no existen (display: contents)
    y la maquetación móvil queda exactamente como estaba. */
 .lista-pantalla, .lista-lateral, .lista-principal, .lista-rejilla { display: contents; }
+.cuenta-nombre { display: none; }
 
 @media (min-width: 1024px) {
   :root { --ancho-app: 1180px; }
   .app { max-width: var(--ancho-app); padding: 28px 40px 96px; }
   .barra-superior { margin-bottom: 20px; }
+  /* En escritorio la cuenta muestra nombre y apellido en vez de las iniciales. */
+  .cuenta-iniciales { display: none; }
+  .cuenta-nombre { display: inline; }
+  .menu summary { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .barra-superior-titulo { font-size: 2rem; }
   .encabezado { margin-bottom: 28px; }
   .encabezado h1 { font-size: 2.6rem; }

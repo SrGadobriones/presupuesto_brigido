@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+// La versión sale de package.json (única fuente): versionName = "X.Y.Z", versionCode = X*10000 + Y*100 + Z.
+def paquete = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def partesVersion = paquete.version.tokenize('.').collect { it.replaceAll(/\D.*/, '').toInteger() }
+
 android {
     namespace = "com.srgadobriones.presupuesto"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +11,8 @@ android {
         applicationId "com.srgadobriones.presupuesto"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode partesVersion[0] * 10000 + partesVersion[1] * 100 + partesVersion[2]
+        versionName paquete.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

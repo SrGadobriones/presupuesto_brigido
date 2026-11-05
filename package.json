@@ -1,6 +1,6 @@
 {
   "name": "presupuesto_brigido",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "scripts": {
     "dev": "nodemon --watch astro.config.mjs --watch package.json --exec \"astro dev\"",
     "build": "astro build",

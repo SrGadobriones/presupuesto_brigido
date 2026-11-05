@@ -35,10 +35,20 @@ export function mensajeError(e: unknown, defecto: string): string {
   return e instanceof Error ? e.message : defecto;
 }
 
-/** "Gabriel Briones Aravena" → "GB": inicial del primer nombre y del primer apellido (con 4 o más palabras se asume nombre compuesto). */
-export function iniciales(nombre: string): string {
+/** Primer nombre y primer apellido (con 4 o más palabras se asume nombre compuesto): "Gabriel Briones Aravena" → ["Gabriel", "Briones"]. */
+function nombreYApellido(nombre: string): [string, string] {
   const p = nombre.trim().split(/\s+/).filter(Boolean);
-  if (p.length === 0) return '';
-  const apellido = p.length === 1 ? undefined : p.length === 3 ? p[1] : p.length === 2 ? p[1] : p[2];
-  return (p[0][0] + (apellido?.[0] ?? '')).toLocaleUpperCase('es');
+  if (p.length === 0) return ['', ''];
+  const apellido = p.length === 1 ? '' : p.length <= 3 ? p[1] : p[2];
+  return [p[0], apellido];
+}
+
+/** "Gabriel Briones Aravena" → "GB": inicial del primer nombre y del primer apellido. */
+export function iniciales(nombre: string): string {
+  return nombreYApellido(nombre).map((x) => x[0] ?? '').join('').toLocaleUpperCase('es');
+}
+
+/** "Gabriel Briones Aravena" → "Gabriel Briones". */
+export function nombreCorto(nombre: string): string {
+  return nombreYApellido(nombre).filter(Boolean).join(' ');
 }

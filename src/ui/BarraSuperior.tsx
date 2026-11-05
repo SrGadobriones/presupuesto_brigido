@@ -12,7 +12,7 @@ export default function BarraSuperior({ conVolver, listaId, titulo }: { conVolve
           Listas
         </a>
       )}
-      {titulo && <h1 class="barra-superior-titulo">{titulo}</h1>}
+      {titulo && <h1 class="barra-superior-titulo"><span class="marca-icono" aria-hidden="true">✦</span><span class="barra-superior-texto">{titulo}</span></h1>}
       <div class="acciones barra-superior-acciones">
         <IndicadorConexion />
         <BotonTema />
