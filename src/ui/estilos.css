@@ -400,6 +400,60 @@ dialog.modal[open] { display: flex; flex-direction: column; animation: aparece 0
 .modal-acciones { justify-content: flex-end; margin-top: 4px; }
 @keyframes aparece { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
 
+/* ---------- Escritorio ----------
+   Solo desde 1024 px: en pantallas menores los contenedores de abajo no existen (display: contents)
+   y la maquetación móvil queda exactamente como estaba. */
+.lista-pantalla, .lista-lateral, .lista-principal, .lista-rejilla { display: contents; }
+
+@media (min-width: 1024px) {
+  :root { --ancho-app: 1180px; }
+  .app { max-width: var(--ancho-app); padding: 28px 40px 96px; }
+  .barra-superior { margin-bottom: 20px; }
+  .barra-superior-titulo { font-size: 2rem; }
+  .encabezado { margin-bottom: 28px; }
+  .encabezado h1 { font-size: 2.6rem; }
+
+  /* Detalle de lista: la etiqueta de precio y los filtros quedan fijos a la izquierda; los productos ocupan el resto. */
+  .lista-pantalla { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 56px; align-items: start; }
+  .lista-lateral { display: grid; gap: 16px; position: sticky; top: 20px; }
+  .lista-lateral .etiqueta { order: -1; position: relative; top: auto; margin: 0; padding: 28px 28px 28px 54px; gap: 18px; }
+  .lista-lateral .etiqueta::before { left: 22px; width: 14px; height: 14px; }
+  .lista-lateral .etiqueta-cuerpo { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .lista-lateral .etiqueta-cifra { font-size: 3.6rem; }
+  .lista-lateral .etiqueta-lado { justify-items: start; gap: 2px; font-size: 1rem; }
+  .lista-lateral .filtros { display: grid; margin: 0; }
+  .lista-lateral .filtros select { width: 100%; }
+  .lista-principal { display: block; min-width: 0; }
+  .lista-principal > .resumen-compras-fila { margin-bottom: 0; }
+  .lista-principal > section:first-of-type .grupo-cabecera { margin-top: 12px; }
+
+  /* Inicio: las listas pasan a una rejilla de fichas. */
+  .lista-rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .lista-rejilla .lista-fila { padding-left: 16px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
+  .lista-rejilla .lista-fila.seleccionada { background: color-mix(in srgb, var(--cobalto) 10%, var(--superficie)); border-color: var(--cobalto); }
+  .lista-rejilla .lista { border: 0; margin: 0; padding: 18px 18px 18px 0; }
+
+  /* Elementos flotantes: se alinean a la columna ancha. */
+  .fab-agregar { right: max(24px, calc((100vw - var(--ancho-app)) / 2 + 40px)); }
+  .barra-seleccion { max-width: 760px; }
+}
+
+/* Pantallas grandes (≥1440 px): la página crece con la ventana y todo se escala un poco. */
+@media (min-width: 1440px) {
+  :root { --ancho-app: 1560px; --control: 48px; --control-chico: 42px; --miniatura: 64px; --sangria: 16px; }
+  html { font-size: 112.5%; }
+  .app { padding-inline: 64px; }
+  .lista-pantalla { grid-template-columns: 440px minmax(0, 1fr); gap: 72px; }
+  .lista-lateral .etiqueta-cifra { font-size: 4.2rem; }
+  .lista-rejilla { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 20px; }
+  .barra-seleccion { max-width: 880px; }
+}
+@media (min-width: 1900px) {
+  :root { --ancho-app: 1760px; }
+  html { font-size: 125%; }
+  .lista-pantalla { grid-template-columns: 500px minmax(0, 1fr); }
+}
+
 /* ---------- Adaptación al espacio disponible ----------
    Cada regla solo redefine las variables de tamaño de :root; los componentes no cambian.
    Los controles bajan de 44 px solo cuando el espacio lo exige (WCAG 2.2 pide un mínimo de 24 px). */
