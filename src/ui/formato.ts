@@ -6,13 +6,20 @@ export const ETIQUETA_PRIORIDAD: Record<Prioridad, string> = {
   baja: 'Baja',
 };
 
-export function formatearPrecio(n: number): string {
-  return '$' + n.toLocaleString('es', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+/** Número en formato chileno: punto = miles (siempre, también en 4 cifras), coma = decimales. Sin depender del locale del dispositivo. */
+export function formatearNumero(n: number): string {
+  const [entero, decimales] = Math.abs(n).toFixed(2).replace(/0+$/, '').replace(/\.$/, '').split('.');
+  const miles = entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (n < 0 ? '-' : '') + miles + (decimales ? ',' + decimales : '');
 }
 
-/** '' → null; número válido → número; texto inválido → NaN. Acepta coma decimal. */
+export function formatearPrecio(n: number): string {
+  return '$' + formatearNumero(n);
+}
+
+/** '' → null; número válido → número; texto inválido → NaN. Formato chileno: punto = miles, coma = decimales. */
 export function parsearNumero(texto: string): number | null {
-  const t = texto.trim().replace(',', '.');
+  const t = texto.trim().replace(/^\$\s*/, '').replace(/[.\s]/g, '').replace(',', '.');
   if (!t) return null;
   const n = Number(t);
   return Number.isFinite(n) ? n : NaN;

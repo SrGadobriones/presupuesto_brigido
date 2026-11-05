@@ -7,7 +7,7 @@ import { hrefLista, irA } from './ruta';
 import { importarTextoWhatsapp } from './whatsapp';
 import IconoWhatsapp from './IconoWhatsapp';
 import { duplicarLista } from './duplicar';
-import { formatearPrecio, parsearNumero, mensajeError } from './formato';
+import { formatearNumero, formatearPrecio, parsearNumero, mensajeError } from './formato';
 import BarraPresupuesto from './BarraPresupuesto';
 import Modal from './Modal';
 import Loader from './Loader';
@@ -73,7 +73,7 @@ export default function Inicio() {
       await repo.crearLista(datos);
     } catch (x) {
       setNombre(datos.nombre);
-      setTope(datos.tope === null ? '' : String(datos.tope));
+      setTope(datos.tope === null ? '' : formatearNumero(datos.tope));
       setError(mensajeError(x, 'No se pudo crear la lista'));
       setCreando(true);
     }
